@@ -45,6 +45,9 @@ include $(MTK_PLAT_SOC)/drivers/dram/dram.mk
 # Trusted board boot
 include $(APSOC_COMMON)/bl2/tbbr.mk
 
+# Anti-rollback
+include $(MTK_PLAT_SOC)/bl2/ar.mk
+
 ifeq ($(TRUSTED_BOARD_BOOT),1)
 BL2_SOURCES		+=	plat/common/tbbr/plat_tbbr.c
 endif

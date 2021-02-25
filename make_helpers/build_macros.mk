@@ -495,6 +495,14 @@ define linker_script_path
         $(patsubst %.S,$(BUILD_DIR)/%,$(1))
 endef
 
+# ADD_PREBUILT_LIBS macro adding pre-built library
+# Arguments:
+#   $(1) = <lib_path>/<lib_name>.o
+define ADD_PREBUILT_LIB
+	$(eval OBJS += ${1})
+	$(eval -include $(patsubst %.o,%.d,${1}))
+endef
+
 # MAKE_BL macro defines the targets and options to build each BL image.
 # Arguments:
 #   $(1) = BL stage
@@ -565,6 +573,9 @@ else
 	       const char version[] = "${VERSION}";' | \
 		$$(CC) $$(TF_CFLAGS) $$(CFLAGS) -xc -c - -o $(BUILD_DIR)/build_message.o
 endif
+$(if $(findstring 2,${1}) $(findstring 31,${1}),
+	$(foreach prebuilt_lib, ${PREBUILT_LIBS},
+		$(call ADD_PREBUILT_LIB, ${prebuilt_lib})))
 ifneq ($(findstring armlink,$(notdir $(LD))),)
 	$$(Q)$$(LD) -o $$@ $$(TF_LDFLAGS) $$(LDFLAGS) $(BL_LDFLAGS) --entry=${1}_entrypoint \
 		--predefine="-D__LINKER__=$(__LINKER__)" \

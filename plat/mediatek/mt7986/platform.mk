@@ -29,6 +29,7 @@ PLAT_INCLUDES		:=	-I$(APSOC_COMMON)				\
 				-I$(APSOC_COMMON)/drivers/wdt			\
 				-Iinclude/plat/arm/common			\
 				-Iinclude/plat/arm/common/aarch64		\
+				-I$(MTK_PLAT_SOC)/drivers/dram			\
 				-I$(MTK_PLAT_SOC)/drivers/spmc			\
 				-I$(MTK_PLAT_SOC)/drivers/timer			\
 				-I$(MTK_PLAT_SOC)/drivers/pll			\

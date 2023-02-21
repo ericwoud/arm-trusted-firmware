@@ -12,6 +12,7 @@
 #include "bl2_private.h"
 #include <common/bl_common.h>
 #include <common/debug.h>
+#include <errno.h>
 #include <common/desc_image_load.h>
 #include <drivers/auth/auth_mod.h>
 #include <plat/common/platform.h>
@@ -63,11 +64,55 @@ struct entry_point_info *bl2_load_images(void)
 			plat_error_handler(err);
 		}
 
+		// Skip loading dtb/initrd if we did not load a linux kernel
+		if ((bl2_node_info->image_id == NT_FW_CONFIG_ID) ||
+		    (bl2_node_info->image_id == BL32_EXTRA2_IMAGE_ID)) {
+			unsigned int * ptr = (unsigned int *) BL33_BASE; // Always loaded before
+			if (ptr[14] == 0x644d5241)
+				INFO("BL33 image is a linux kernel image, loading DTB/INITRD\n");
+			else {
+				INFO("BL33 image is not a linux kernel image, skipping DTB/INITRD\n");
+				bl2_node_info->image_info->h.attr |= IMAGE_ATTRIB_SKIP_LOADING;
+			}
+		}
+
 		if ((bl2_node_info->image_info->h.attr &
 		    IMAGE_ATTRIB_SKIP_LOADING) == 0U) {
 			INFO("BL2: Loading image id %u\n", bl2_node_info->image_id);
 			err = load_auth_image(bl2_node_info->image_id,
 				bl2_node_info->image_info);
+
+			// Can boot kernel without initrd
+			if ((err == -ENOENT) && (bl2_node_info->image_id == BL32_EXTRA2_IMAGE_ID))
+				err = 0;
+
+			// Use build-in BL31 image if no image can be loaded
+			if ((err != 0) && (bl2_node_info->image_id == BL31_IMAGE_ID)) {
+
+				extern char _binary_bl31_bin_start[];
+				extern char _binary_bl31_bin_end[];
+				image_info_t *image_data = bl2_node_info->image_info;
+
+				image_data->image_size = (uint32_t)((uintptr_t)&_binary_bl31_bin_end -
+					(uintptr_t)&_binary_bl31_bin_start);
+
+				if (image_data->image_size > image_data->image_max_size) {
+					ERROR("Image id=%u size out of bounds\n", bl2_node_info->image_id);
+					plat_error_handler(err);
+				}
+
+				memcpy((void *)image_data->image_base,
+					&_binary_bl31_bin_start, image_data->image_size);
+
+				flush_dcache_range(image_data->image_base, image_data->image_size);
+
+				INFO("Image id=%u copied: 0x%lx - 0x%lx\n", bl2_node_info->image_id,
+					image_data->image_base,
+					image_data->image_base + (uintptr_t)image_data->image_size);
+
+				err = 0;
+			}
+
 			if (err != 0) {
 				ERROR("BL2: Failed to load image id %u (%i)\n",
 				      bl2_node_info->image_id, err);

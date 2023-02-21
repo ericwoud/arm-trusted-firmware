@@ -91,7 +91,7 @@
 #define BL32_LIMIT		(0x50000000)
 #define BL32_HEADER_SIZE	(0x1c)
 
-#define BL33_BASE		(0x41e00000)
+#define BL33_BASE		(0x44000000)
 
 /*******************************************************************************
  * Platform specific page table and MMU setup constants

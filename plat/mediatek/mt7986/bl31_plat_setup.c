@@ -212,6 +212,14 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 	bl33_ep_info.pc = BL33_BASE;
 	bl33_ep_info.spsr = plat_get_spsr_for_bl33_entry();
 	SET_SECURITY_STATE(bl33_ep_info.h.attr, NON_SECURE);
+
+	unsigned int * ptr = (unsigned int *) BL33_BASE;          // Check if image
+	if (ptr[14] == 0x644d5241) {                              // is linux kernel
+		bl33_ep_info.args.arg0 = (u_register_t)BL32_BASE; // ptr to DTB
+		bl33_ep_info.args.arg1 = 0U;
+		bl33_ep_info.args.arg2 = 0U;
+		bl33_ep_info.args.arg3 = 0U;
+	}
 }
 
 /*******************************************************************************

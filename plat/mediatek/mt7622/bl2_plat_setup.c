@@ -72,7 +72,31 @@ static bl_mem_params_node_t bl2_mem_params_descs[] = {
 		SET_STATIC_PARAM_HEAD(image_info, PARAM_EP, VERSION_2,
 				      image_info_t, 0),
 		.image_info.image_base = BL33_BASE,
-		.image_info.image_max_size = 0x200000 /* 2MB */,
+		.image_info.image_max_size = 0x4000000 /* 64MB */,
+
+		.next_handoff_image_id = BL32_EXTRA2_IMAGE_ID,
+	},
+	/* Fill BL32_EXTRA2_IMAGE_ID related information */
+	{
+		.image_id = BL32_EXTRA2_IMAGE_ID,
+		SET_STATIC_PARAM_HEAD(ep_info, PARAM_IMAGE_BINARY,
+			VERSION_2, entry_point_info_t, NON_SECURE | NON_EXECUTABLE),
+		SET_STATIC_PARAM_HEAD(image_info, PARAM_IMAGE_BINARY,
+			VERSION_2, image_info_t, 0),
+		.image_info.image_base = BL33_BASE + 0x4000000,
+		.image_info.image_max_size = 0x4000000,
+
+		.next_handoff_image_id = NT_FW_CONFIG_ID,
+	},
+	/* Fill NT_FW_CONFIG related information */
+	{
+		.image_id = NT_FW_CONFIG_ID,
+		SET_STATIC_PARAM_HEAD(ep_info, PARAM_IMAGE_BINARY,
+			VERSION_2, entry_point_info_t, NON_SECURE | NON_EXECUTABLE),
+		SET_STATIC_PARAM_HEAD(image_info, PARAM_IMAGE_BINARY,
+			VERSION_2, image_info_t, 0),
+		.image_info.image_base = BL32_BASE,
+		.image_info.image_max_size = BL32_LIMIT,
 
 		.next_handoff_image_id = INVALID_IMAGE_ID,
 	}
@@ -124,6 +148,14 @@ static int check_fip(const uintptr_t spec)
 
 static const io_uuid_spec_t bl31_uuid_spec = {
 	.uuid = UUID_EL3_RUNTIME_FIRMWARE_BL31,
+};
+
+static const io_uuid_spec_t ntfwconf_uuid_spec = {
+	.uuid = UUID_NT_FW_CONFIG,
+};
+
+static const io_uuid_spec_t tosfwEXTRA2_uuid_spec = {
+	.uuid = UUID_SECURE_PAYLOAD_BL32_EXTRA2,
 };
 
 static const io_uuid_spec_t bl32_uuid_spec = {
@@ -181,6 +213,16 @@ static const struct plat_io_policy policies[] = {
 	[BL31_IMAGE_ID] = {
 		&fip_dev_handle,
 		(uintptr_t)&bl31_uuid_spec,
+		check_fip
+	},
+	[NT_FW_CONFIG_ID] = {
+		&fip_dev_handle,
+		(uintptr_t)&ntfwconf_uuid_spec,
+		check_fip
+	},
+	[BL32_EXTRA2_IMAGE_ID] = {
+		&fip_dev_handle,
+		(uintptr_t)&tosfwEXTRA2_uuid_spec,
 		check_fip
 	},
 	[BL32_IMAGE_ID] = {

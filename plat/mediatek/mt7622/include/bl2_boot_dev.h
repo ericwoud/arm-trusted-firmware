@@ -14,6 +14,7 @@ extern const io_block_spec_t mtk_boot_dev_fip_spec;
 
 #ifdef MSDC_INDEX
 extern const io_block_spec_t mtk_boot_dev_gpt_spec;
+extern bool mtk_boot_found_fip;
 #endif
 
 void mtk_boot_dev_setup(const io_dev_connector_t **boot_dev_con,

@@ -100,6 +100,8 @@ const io_block_spec_t mtk_boot_dev_gpt_spec = {
 const io_block_spec_t mtk_boot_dev_fip_spec = {
 };
 
+bool mtk_boot_found_fip;
+
 void mtk_boot_dev_setup(const io_dev_connector_t **boot_dev_con,
 			uintptr_t *boot_dev_handle)
 {
@@ -124,12 +126,20 @@ void mtk_boot_dev_setup(const io_dev_connector_t **boot_dev_con,
 	partition_init(GPT_IMAGE_ID);
 
 	entry = get_partition_entry("fip");
+	if (entry) {
+		mtk_boot_found_fip = true;
+	}
+	else {
+		entry = get_partition_entry("boot");
+		mtk_boot_found_fip = false;
+	}
+
 	if (!entry) {
-		ERROR("Partition 'fip' not found\n");
+		ERROR("Partition 'fip/boot' not found\n");
 		panic();
 	}
 
-	INFO("Located GPT partition 'fip' at 0x%lx, size 0x%lx\n",
+	INFO("Located GPT partition 'fip/fat' at 0x%lx, size 0x%lx\n",
 	       entry->start, entry->length);
 
 	fip_desc->offset = entry->start;

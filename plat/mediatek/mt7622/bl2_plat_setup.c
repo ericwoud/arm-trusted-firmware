@@ -7,6 +7,7 @@
 #include <drivers/generic_delay_timer.h>
 #include <drivers/io/io_block.h>
 #include <drivers/io/io_fip.h>
+#include <drivers/io/io_fat.h>
 #include <hsuart.h>
 #include <emi.h>
 #include <lib/mmio.h>
@@ -136,7 +137,7 @@ static int check_fip(const uintptr_t spec)
 
 	/* See if a Firmware Image Package is available */
 	result = io_dev_init(fip_dev_handle, (uintptr_t)FIP_IMAGE_ID);
-	if (result == 0) {
+	if ((result == 0) && mtk_boot_found_fip) {
 		result = io_open(fip_dev_handle, spec, &local_image_handle);
 		if (result == 0) {
 			VERBOSE("Using FIP\n");
@@ -297,7 +298,8 @@ static void mtk_io_setup(void)
 
 	mtk_boot_dev_setup(&boot_dev_con, &boot_dev_handle);
 
-	result = register_io_dev_fip(&fip_dev_con);
+	if (mtk_boot_found_fip) result = register_io_dev_fip(&fip_dev_con);
+	else                    result = register_io_dev_fat(&fip_dev_con);
 	assert(result == 0);
 
 	result = io_dev_open(fip_dev_con, (uintptr_t)NULL, &fip_dev_handle);

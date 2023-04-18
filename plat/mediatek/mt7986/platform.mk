@@ -236,9 +236,13 @@ ifeq ($(BOOT_DEVICE),emmc)
 BL2_SOURCES		+=	drivers/mmc/mmc.c				\
 				drivers/partition/partition.c			\
 				drivers/partition/gpt.c				\
+				lib/fat32/fat32.c				\
+				drivers/io/io_fat.c				\
 				common/tf_crc32.c				\
 				${MTK_PLAT}/common/drivers/mmc/mtk-sd.c		\
 				${MTK_PLAT_SOC}/bl2_boot_mmc.c
+FAT32BUFFER			:=	0x42000000
+CPPFLAGS			+=	-DFAT32BUFFER=$(FAT32BUFFER)
 BROM_HEADER_TYPE	?=	emmc
 CPPFLAGS		+=	-DMSDC_INDEX=0
 BL2_CPPFLAGS		+=	-march=armv8-a+crc
@@ -247,9 +251,13 @@ ifeq ($(BOOT_DEVICE),sdmmc)
 BL2_SOURCES		+=	drivers/mmc/mmc.c				\
 				drivers/partition/partition.c			\
 				drivers/partition/gpt.c				\
+				lib/fat32/fat32.c				\
+				drivers/io/io_fat.c				\
 				common/tf_crc32.c				\
 				${MTK_PLAT}/common/drivers/mmc/mtk-sd.c		\
 				${MTK_PLAT_SOC}/bl2_boot_mmc.c
+FAT32BUFFER			:=	0x42000000
+CPPFLAGS			+=	-DFAT32BUFFER=$(FAT32BUFFER)
 BROM_HEADER_TYPE	?=	sdmmc
 CPPFLAGS		+=	-DMSDC_INDEX=1
 BL2_CPPFLAGS		+=	-march=armv8-a+crc

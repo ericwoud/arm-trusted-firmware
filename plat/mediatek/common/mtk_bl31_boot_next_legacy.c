@@ -9,6 +9,7 @@
 #include <common/debug.h>
 #include <drivers/console.h>
 #include <mtk_plat_common.h>
+#include <platform_def.h>
 
 #define LINUX_KERNEL_32 0
 
@@ -105,4 +106,16 @@ uint32_t plat_get_spsr_for_bl33_entry(void)
 #endif
 
 	return spsr;
+}
+
+void setup_kernel64(entry_point_info_t *bl33_ep_info)
+{
+	unsigned int *ptr = (unsigned int *) BL33_BASE;
+
+	if (ptr[14] != 0x644d5241) return; // Skip if image is not linux kernel
+
+	bl33_ep_info->args.arg0 = (u_register_t)(BL33_BASE + BL33_DTB_OFFSET);
+	bl33_ep_info->args.arg1 = 0U;
+	bl33_ep_info->args.arg2 = 0U;
+	bl33_ep_info->args.arg3 = 0U;
 }

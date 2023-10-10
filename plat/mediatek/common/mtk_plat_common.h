@@ -19,6 +19,10 @@
 #define JEDEC_MTK_BKID U(4)
 #define JEDEC_MTK_MFID U(0x26)
 
+#define BL33_INITRD_OFFSET  0x04000000
+#define BL33_DTB_OFFSET     0x0AD00000
+#define BL33_END_OFFSET     0x0B000000
+
 struct mtk_bl31_params {
        param_header_t h;
        image_info_t *bl31_image_info;
@@ -42,6 +46,7 @@ uint64_t get_kernel_info_pc(void);
 uint64_t get_kernel_info_r0(void);
 uint64_t get_kernel_info_r1(void);
 uint64_t get_kernel_info_r2(void);
+void setup_kernel64(entry_point_info_t *bl33_ep_info);
 
 extern struct atf_arg_t gteearg;
 #endif /* MTK_PLAT_COMMON_H */

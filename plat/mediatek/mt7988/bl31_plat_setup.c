@@ -161,6 +161,8 @@ void bl31_early_platform_setup2(u_register_t arg0, u_register_t arg1,
 	bl33_ep_info.pc = BL33_BASE;
 	bl33_ep_info.spsr = plat_get_spsr_for_bl33_entry();
 	SET_SECURITY_STATE(bl33_ep_info.h.attr, NON_SECURE);
+
+	setup_kernel64(&bl33_ep_info);
 }
 
 /*******************************************************************************

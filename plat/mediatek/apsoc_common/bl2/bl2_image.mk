@@ -25,7 +25,7 @@ define BL2_BOOT_RAM
 $(call BL2_BOOT_COMMON)
 BL2_SOURCES		+=	drivers/io/io_memmap.c				\
 				$(APSOC_BL2_COMMON)/bl2_boot_ram.c
-BROM_HEADER_TYPE	:=	nor
+BROM_HEADER_TYPE	?=	nor
 ifeq ($(RAM_BOOT_DEBUGGER_HOOK), 1)
 BL2_CPPFLAGS		+=	-DRAM_BOOT_DEBUGGER_HOOK
 endif
@@ -40,7 +40,7 @@ $(call BL2_BOOT_COMMON)
 $(call BL2_FIP_OVERRIDE_COMMON)
 BL2_SOURCES		+=	drivers/io/io_memmap.c				\
 				$(APSOC_BL2_COMMON)/bl2_boot_nor_mmap.c
-BROM_HEADER_TYPE	:=	nor
+BROM_HEADER_TYPE	?=	nor
 endef # End of BL2_BOOT_NOR_MMAP
 
 define BL2_BOOT_NOR
@@ -52,7 +52,7 @@ BL2_SOURCES		+=	drivers/mtd/nor/spi_nor.c			\
 				$(APSOC_BL2_COMMON)/bl2_dev_spi_nor_init.c
 BL2_CPPFLAGS		+=	-Iinclude/lib/libfdt
 BL2_CPPFLAGS		+=	-DMTK_SPIM_NOR
-BROM_HEADER_TYPE	:=	nor
+BROM_HEADER_TYPE	?=	nor
 endef # End of BL2_BOOT_NOR
 
 define BL2_BOOT_MMC
@@ -69,12 +69,12 @@ endef # End of BL2_BOOT_MMC
 
 define BL2_BOOT_EMMC
 $(call BL2_BOOT_MMC)
-BROM_HEADER_TYPE	:=	emmc
+BROM_HEADER_TYPE	?=	emmc
 endef # End of BL2_BOOT_EMMC
 
 define BL2_BOOT_SD
 $(call BL2_BOOT_MMC)
-BROM_HEADER_TYPE	:=	sdmmc
+BROM_HEADER_TYPE	?=	sdmmc
 endef # End of BL2_BOOT_SD
 
 #
@@ -156,7 +156,7 @@ BL2_SOURCES		+=	$$(MTK_SNAND_SOURCES)				\
 				drivers/mtd/nand/core.c
 BL2_CPPFLAGS		+=	-I$(MTK_PLAT)/common/drivers/snfi
 BL2_CPPFLAGS		+=	-DPRIVATE_MTK_SNAND_HEADER
-BROM_HEADER_TYPE	:=	snand
+BROM_HEADER_TYPE	?=	snand
 endef # End of BL2_BOOT_SNFI
 
 #
@@ -170,7 +170,7 @@ BL2_SOURCES		+=	drivers/mtd/nand/core.c				\
 				$(APSOC_BL2_COMMON)/bl2_dev_spi_nand_init.c
 BL2_CPPFLAGS		+=	-Iinclude/lib/libfdt
 BL2_CPPFLAGS		+=	-I$(APSOC_COMMON_DRIVERS)/spi_nand
-BROM_HEADER_TYPE	:=	spim-nand
+BROM_HEADER_TYPE	?=	spim-nand
 endef # End of BL2_BOOT_SPI_NAND
 
 #

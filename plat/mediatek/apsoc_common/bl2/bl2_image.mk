@@ -58,11 +58,14 @@ $(call BL2_BOOT_COMMON)
 BL2_SOURCES		+=	drivers/mmc/mmc.c				\
 				drivers/partition/partition.c			\
 				drivers/partition/gpt.c				\
+				lib/fat32/fat32.c				\
+				drivers/io/io_fat.c				\
 				common/tf_crc32.c				\
 				$(APSOC_COMMON)/drivers/mmc/mtk-sd.c		\
 				$(APSOC_COMMON)/bl2/bl2_boot_mmc.c
 BL2_CPPFLAGS		+=	-DMTK_MMC_BOOT
 BL2_CFLAGS		+=	-march=armv8-a+crc
+BL2_CPPFLAGS		+=	-DFAT32BUFFER=0x42000000
 endef # End of BL2_BOOT_MMC
 
 define BL2_BOOT_EMMC

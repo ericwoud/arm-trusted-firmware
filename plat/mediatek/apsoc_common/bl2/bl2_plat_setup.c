@@ -19,6 +19,7 @@
 #include <plat_private.h>
 #include <drivers/io/io_encrypted.h>
 #include "bl2_plat_setup.h"
+#include "../bl31/bl31_common_setup.h"
 
 struct plat_io_policy {
 	uintptr_t *dev_handle;
@@ -93,7 +94,31 @@ static bl_mem_params_node_t bl2_mem_params_descs[] = {
 		SET_STATIC_PARAM_HEAD(image_info, PARAM_EP, VERSION_2,
 				      image_info_t, 0),
 		.image_info.image_base = BL33_BASE,
-		.image_info.image_max_size = 0x200000 /* 2MB */,
+		.image_info.image_max_size = BL33_INITRD_OFFSET,
+
+		.next_handoff_image_id = BL32_EXTRA2_IMAGE_ID,
+	},
+	/* Fill BL32_EXTRA2_IMAGE_ID related information */
+	{
+		.image_id = BL32_EXTRA2_IMAGE_ID,
+		SET_STATIC_PARAM_HEAD(ep_info, PARAM_IMAGE_BINARY,
+			VERSION_2, entry_point_info_t, NON_SECURE | NON_EXECUTABLE),
+		SET_STATIC_PARAM_HEAD(image_info, PARAM_IMAGE_BINARY,
+			VERSION_2, image_info_t, 0),
+		.image_info.image_base = BL33_BASE + BL33_INITRD_OFFSET,
+		.image_info.image_max_size = BL33_DTB_OFFSET - BL33_INITRD_OFFSET,
+
+		.next_handoff_image_id = NT_FW_CONFIG_ID,
+	},
+	/* Fill NT_FW_CONFIG related information */
+	{
+		.image_id = NT_FW_CONFIG_ID,
+		SET_STATIC_PARAM_HEAD(ep_info, PARAM_IMAGE_BINARY,
+			VERSION_2, entry_point_info_t, NON_SECURE | NON_EXECUTABLE),
+		SET_STATIC_PARAM_HEAD(image_info, PARAM_IMAGE_BINARY,
+			VERSION_2, image_info_t, 0),
+		.image_info.image_base = BL33_BASE + BL33_DTB_OFFSET,
+		.image_info.image_max_size = BL33_END_OFFSET - BL33_DTB_OFFSET,
 
 		.next_handoff_image_id = INVALID_IMAGE_ID,
 	}
@@ -155,6 +180,14 @@ static int check_fip(const uintptr_t spec)
 
 static const io_uuid_spec_t bl31_uuid_spec = {
 	.uuid = UUID_EL3_RUNTIME_FIRMWARE_BL31,
+};
+
+static const io_uuid_spec_t ntfwconf_uuid_spec = {
+	.uuid = UUID_NT_FW_CONFIG,
+};
+
+static const io_uuid_spec_t tosfwEXTRA2_uuid_spec = {
+	.uuid = UUID_SECURE_PAYLOAD_BL32_EXTRA2,
 };
 
 static const io_uuid_spec_t bl32_uuid_spec = {
@@ -235,6 +268,16 @@ static struct plat_io_policy policies[] = {
 		check_fip
 	},
 #endif
+	[NT_FW_CONFIG_ID] = {
+		&fip_dev_handle,
+		(uintptr_t)&ntfwconf_uuid_spec,
+		check_fip
+	},
+	[BL32_EXTRA2_IMAGE_ID] = {
+		&fip_dev_handle,
+		(uintptr_t)&tosfwEXTRA2_uuid_spec,
+		check_fip
+	},
 	[BL33_IMAGE_ID] = {
 		&fip_dev_handle,
 		(uintptr_t)&bl33_uuid_spec,
@@ -329,6 +372,8 @@ int plat_get_image_source(unsigned int image_id, uintptr_t *dev_handle,
 	return 0;
 }
 
+//#ifndef MTK_MMC_BOOT
+#ifdef BPIR_SUPPORT_XZ
 static struct image_info *get_image_info(unsigned int image_id)
 {
 	struct bl_mem_params_node *desc;
@@ -369,6 +414,7 @@ int bl2_plat_handle_post_image_load(unsigned int image_id)
 
 	return 0;
 }
+#endif
 
 struct bl_load_info *plat_get_bl_image_load_info(void)
 {

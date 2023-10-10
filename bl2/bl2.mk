@@ -53,3 +53,15 @@ endif
 ifeq (${ENABLE_PMF},1)
 BL2_SOURCES		+=	lib/pmf/pmf_main.c
 endif
+
+bl31pre: # Make an empty bl31.bin.o because it is linked in on all targets
+	$(Q)(cd $(BUILD_PLAT) ; $(LD) -r -b binary -o bl31.bin.o /dev/null)
+
+$(BUILD_PLAT)/bl31/bl31.elf: bl31pre
+
+bl2pre: $(BUILD_PLAT)/bl31.bin   # Make the real bl31.bin.o
+	$(Q)(cd $(BUILD_PLAT) ; $(LD) -r -b binary -o bl31.bin.o bl31.bin)
+
+$(BUILD_PLAT)/bl2/bl2.elf: bl2pre
+
+PREBUILT_LIBS		+=	$(BUILD_PLAT)/bl31.bin.o

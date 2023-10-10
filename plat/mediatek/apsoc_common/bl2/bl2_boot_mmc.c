@@ -36,6 +36,13 @@ static io_block_spec_t mmc_dev_gpt_spec = {
 static io_block_spec_t mmc_dev_fip_spec;
 static uintptr_t mmc_dev_handle;
 
+static bool mtk_boot_found_fip_value;
+
+bool mtk_boot_found_fip()
+{
+	return mtk_boot_found_fip_value;
+}
+
 int mtk_mmc_gpt_image_setup(uintptr_t *dev_handle, uintptr_t *image_spec)
 {
 	const io_dev_connector_t *dev_con;
@@ -67,8 +74,15 @@ int mtk_fip_image_setup(uintptr_t *dev_handle, uintptr_t *image_spec)
 	partition_init(GPT_IMAGE_ID);
 
 	entry = get_partition_entry("fip");
+	if (entry) {
+		mtk_boot_found_fip_value = true;
+	}
+	else {
+		entry = get_partition_entry("boot");
+		mtk_boot_found_fip_value = false;
+	}
 	if (!entry) {
-		INFO("Partition 'fip' not found in parimary GPT\n");
+		INFO("Partition 'fip/boot' not found in parimary GPT\n");
 
 		uda_size = mtk_mmc_device_size();
 		mmc_dev_gpt_spec.offset = uda_size - 33 * MMC_BLOCK_SIZE;
@@ -76,13 +90,20 @@ int mtk_fip_image_setup(uintptr_t *dev_handle, uintptr_t *image_spec)
 
 		partition_init_secondary_gpt(GPT_IMAGE_ID);
 		entry = get_partition_entry("fip");
+		if (entry) {
+			mtk_boot_found_fip_value = true;
+		}
+		else {
+			entry = get_partition_entry("boot");
+			mtk_boot_found_fip_value = false;
+		}
 		if (!entry) {
-			ERROR("Partition 'fip' not found in secondary GPT\n");
+			ERROR("Partition 'fip/boot' not found in secondary GPT\n");
 			return -ENOENT;
 		}
 	}
 
-	INFO("Located partition 'fip' at 0x%" PRIx64 ", size 0x%" PRIx64 "\n",
+	INFO("Located partition 'fip/boot' at 0x%" PRIx64 ", size 0x%" PRIx64 "\n",
 	     entry->start, entry->length);
 
 	mmc_dev_fip_spec.offset = entry->start;

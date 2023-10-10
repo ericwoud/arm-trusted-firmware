@@ -38,6 +38,7 @@ extern const struct initcall bl2_initcalls[];
 int mtk_mmc_gpt_image_setup(uintptr_t *dev_handle, uintptr_t *image_spec);
 int mtk_fip_image_setup(uintptr_t *dev_handle, uintptr_t *image_spec);
 void mtk_fip_location(size_t *fip_off, size_t *fip_size);
+bool mtk_boot_found_fip();
 
 /* The following function prototypes are provided by platfrom's boot device */
 int mtk_plat_nor_setup(void);

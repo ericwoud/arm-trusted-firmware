@@ -12,6 +12,7 @@
 #include <common/image_decompress.h>
 #include <drivers/io/io_driver.h>
 #include <drivers/io/io_fip.h>
+#include <drivers/io/io_fat.h>
 #include <tools_share/firmware_image_package.h>
 #include <hsuart.h>
 #include <platform_def.h>
@@ -357,7 +358,8 @@ static int bl2_fip_boot_setup(void)
 	if (ret)
 		return ret;
 
-	ret = register_io_dev_fip(&fip_dev_con);
+	if (mtk_boot_found_fip()) ret = register_io_dev_fip(&fip_dev_con);
+	else                      ret = register_io_dev_fat(&fip_dev_con);
 
 	return ret;
 }

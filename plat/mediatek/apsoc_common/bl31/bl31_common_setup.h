@@ -10,4 +10,8 @@
 
 size_t mtk_bl31_get_dram_size(void);
 
+#define BL33_INITRD_OFFSET  0x04000000
+#define BL33_DTB_OFFSET     0x0AD00000
+#define BL33_END_OFFSET     0x0B000000
+
 #endif /* BL31_PLAT_SETUP_H */

@@ -32,12 +32,12 @@ extern const struct initcall bl2_initcalls[];
 #define QSPI_BUF_SIZE			0x100000
 
 /* Scratch buffer */
-#define SCRATCH_BUF_OFFSET		0x40400000
-#define SCRATCH_BUF_SIZE		0x400000
+#define SCRATCH_BUF_OFFSET		0x4a000000	/* Within 512 MiB total mem */
+#define SCRATCH_BUF_SIZE		 0x6000000	/* 96 MiB */
 
 /* FIP XZ decompression buffer */
-#define FIP_DECOMP_BUF_OFFSET		0x40800000
-#define FIP_DECOMP_BUF_SIZE		0x400000
+#define FIP_DECOMP_BUF_OFFSET		0x48000000
+#define FIP_DECOMP_BUF_SIZE		 0x2000000	/* 32 MiB */
 
 /* Block read buffer */
 #define IO_BLOCK_BUF_OFFSET		0x41000000

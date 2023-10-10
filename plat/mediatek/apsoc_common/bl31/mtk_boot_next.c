@@ -13,11 +13,14 @@
 #include <drivers/console.h>
 #include <platform_def.h>
 #include "mtk_boot_next.h"
+#include "bl31_common_setup.h"
 
 static entry_point_info_t bl32_ep_info;
 static entry_point_info_t bl33_ep_info;
 static entry_point_info_t bl33k_ep_info;
 static bool kernel_boot_once_flag;
+
+extern void *from_bl2;
 
 static uint32_t mtk_default_spsr_for_bl32_entry(void)
 {
@@ -92,6 +95,11 @@ entry_point_info_t *bl31_plat_get_next_image_ep_info(uint32_t type)
 		SET_SECURITY_STATE(bl33_ep_info.h.attr, NON_SECURE);
 		bl33_ep_info.pc = BL33_BASE;
 		bl33_ep_info.spsr = mtk_default_spsr_for_bl33_entry(false, true);
+		// Set args for linux kernel, u-boot doesn't look at these
+		bl33_ep_info.args.arg0 = (u_register_t)(BL33_BASE + BL33_DTB_OFFSET);
+		bl33_ep_info.args.arg1 = 0U;
+		bl33_ep_info.args.arg2 = 0U;
+		bl33_ep_info.args.arg3 = 0U;
 	}
 
 	if (!bl32_ep_info.h.version) {

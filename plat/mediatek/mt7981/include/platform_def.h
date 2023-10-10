@@ -100,7 +100,7 @@
 #define BL32_LIMIT		(TZRAM2_BASE + TZRAM2_SIZE)
 #define BL32_HEADER_SIZE	(0x1c)
 
-#define BL33_BASE		(0x41e00000)
+#define BL33_BASE		(0x44000000)
 
 #define TRNG_BASE		(0x1020f000)
 #define TRNG_SIZE		(0x1000)

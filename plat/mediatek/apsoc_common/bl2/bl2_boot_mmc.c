@@ -55,6 +55,13 @@ static uintptr_t mmc_dev_uda_handle;
 
 static uint32_t num_sectors;
 
+static bool mtk_boot_found_fip_value;
+
+bool mtk_boot_found_fip()
+{
+	return mtk_boot_found_fip_value;
+}
+
 static int mtk_mmc_part_switch(uint8_t part)
 {
 	const char *part_name;
@@ -169,12 +176,19 @@ int mtk_fip_image_setup(uintptr_t *dev_handle, uintptr_t *image_spec)
 		return ret;
 
 	entry = get_partition_entry("fip");
+	if (entry) {
+		mtk_boot_found_fip_value = true;
+	}
+	else {
+		entry = get_partition_entry("boot");
+		mtk_boot_found_fip_value = false;
+	}
 	if (!entry) {
-		ERROR("Partition 'fip' not found\n");
+		ERROR("Partition 'fip' or 'boot' not found\n");
 		return -ENOENT;
 	}
 
-	INFO("Located partition 'fip' at 0x%" PRIx64 ", size 0x%" PRIx64 "\n",
+	INFO("Located partition 'fip/boot' at 0x%" PRIx64 ", size 0x%" PRIx64 "\n",
 	     entry->start, entry->length);
 
 	mmc_dev_fip_spec.offset = entry->start;

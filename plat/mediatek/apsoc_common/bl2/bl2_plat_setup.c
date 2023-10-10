@@ -13,6 +13,7 @@
 #include <plat/common/common_def.h>
 #include <drivers/io/io_driver.h>
 #include <drivers/io/io_fip.h>
+#include <drivers/io/io_fat.h>
 #include <tools_share/firmware_image_package.h>
 #include <hsuart.h>
 #include <platform_def.h>
@@ -485,11 +486,20 @@ static int bl2_fip_boot_setup(void)
 	if (ret)
 		return ret;
 
+#ifndef MTK_MMC_BOOT
 	ret = register_io_dev_fip(&fip_dev_con);
 	if (ret) {
 		ERROR("register_io_dev_fip failed, ret: %d\n", ret);
 		return ret;
 	}
+#else
+	if (mtk_boot_found_fip()) ret = register_io_dev_fip(&fip_dev_con);
+	else                      ret = register_io_dev_fat(&fip_dev_con);
+	if (ret) {
+		ERROR("register_io_dev_fip/fat failed, ret: %d\n", ret);
+		return ret;
+	}
+#endif
 
 #if !defined(DECRYPTION_SUPPORT_none)
 	ret = register_io_dev_enc(&enc_dev_con);

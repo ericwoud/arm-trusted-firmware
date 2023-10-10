@@ -115,6 +115,13 @@ static uintptr_t *mmc_dev_handle_ptr;
 static uintptr_t mmc_dev_uda_handle;
 static uint32_t num_sectors;
 
+static bool mtk_boot_found_fip_value;
+
+bool mtk_boot_found_fip()
+{
+	return mtk_boot_found_fip_value;
+}
+
 static int mtk_mmc_part_switch(uint8_t part)
 {
 	const char *part_name;
@@ -217,6 +224,14 @@ static uintptr_t fill_io_block_spec_gpt(io_block_spec_t *spec, const char *name)
 	const partition_entry_t *entry;
 
 	entry = get_partition_entry(name);
+	if (entry) {
+		mtk_boot_found_fip_value = true;
+	}
+	else {
+		entry = get_partition_entry("boot");
+		mtk_boot_found_fip_value = false;
+	}
+
 	if (!entry) {
 		ERROR("Partition '%s' not found\n", name);
 		return 0;

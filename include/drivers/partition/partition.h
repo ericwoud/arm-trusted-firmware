@@ -50,5 +50,6 @@ const partition_entry_t *get_partition_entry_by_type(const uuid_t *type_guid);
 const partition_entry_t *get_partition_entry_by_uuid(const uuid_t *part_uuid);
 const partition_entry_list_t *get_partition_entry_list(void);
 void partition_init(unsigned int image_id);
+void partition_init_secondary_gpt(unsigned int image_id);
 
 #endif /* PARTITION_H */

@@ -8,6 +8,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include <common/debug.h>
 #include <common/tf_crc32.h>
@@ -80,14 +81,14 @@ static int load_mbr_header(uintptr_t image_handle, mbr_entry_t *mbr_entry)
  * Load GPT header and check the GPT signature and header CRC.
  * If partition numbers could be found, check & update it.
  */
-static int load_gpt_header(uintptr_t image_handle)
+static int load_gpt_header(uintptr_t image_handle, uint64_t offset)
 {
 	gpt_header_t header;
 	size_t bytes_read;
 	int result;
 	uint32_t header_crc, calc_crc;
 
-	result = io_seek(image_handle, IO_SEEK_SET, GPT_HEADER_OFFSET);
+	result = io_seek(image_handle, IO_SEEK_SET, offset);
 	if (result != 0) {
 		return result;
 	}
@@ -216,9 +217,11 @@ static int verify_partition_gpt(uintptr_t image_handle)
 	return 0;
 }
 
-int load_partition_table(unsigned int image_id)
+static int load_partition_table_internal(unsigned int image_id,
+					 bool load_secondary_gpt)
 {
 	uintptr_t dev_handle, image_handle, image_spec = 0;
+	size_t gpt_header_offset, gpt_entry_offset;
 	mbr_entry_t mbr_entry;
 	int result;
 
@@ -235,15 +238,28 @@ int load_partition_table(unsigned int image_id)
 		return result;
 	}
 
-	result = load_mbr_header(image_handle, &mbr_entry);
-	if (result != 0) {
-		WARN("Failed to access image id=%u (%i)\n", image_id, result);
-		return result;
+	if (!load_secondary_gpt) {
+		result = load_mbr_header(image_handle, &mbr_entry);
+		if (result != 0) {
+			WARN("Failed to access image id=%u (%i)\n", image_id, result);
+			return result;
+		}
+	} else {
+		mbr_entry.type = PARTITION_TYPE_GPT;
 	}
+
 	if (mbr_entry.type == PARTITION_TYPE_GPT) {
-		result = load_gpt_header(image_handle);
+		if (load_secondary_gpt) {
+			gpt_header_offset = 32 * PLAT_PARTITION_BLOCK_SIZE;
+			gpt_entry_offset = 0;
+		} else {
+			gpt_header_offset = GPT_HEADER_OFFSET;
+			gpt_entry_offset = GPT_ENTRY_OFFSET;
+		}
+
+		result = load_gpt_header(image_handle, gpt_header_offset);
 		assert(result == 0);
-		result = io_seek(image_handle, IO_SEEK_SET, GPT_ENTRY_OFFSET);
+		result = io_seek(image_handle, IO_SEEK_SET, gpt_entry_offset);
 		assert(result == 0);
 		result = verify_partition_gpt(image_handle);
 	} else {
@@ -299,5 +315,10 @@ const partition_entry_list_t *get_partition_entry_list(void)
 
 void partition_init(unsigned int image_id)
 {
-	load_partition_table(image_id);
+	load_partition_table_internal(image_id, false);
+}
+
+void partition_init_secondary_gpt(unsigned int image_id)
+{
+	load_partition_table_internal(image_id, true);
 }

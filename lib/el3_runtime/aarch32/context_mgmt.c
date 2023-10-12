@@ -149,11 +149,13 @@ static void enable_extensions_nonsecure(bool el2_unused)
 		trf_init_el3();
 	}
 
+#if SOC_CHIP_ID != U(0x7629)
 	/*
 	 * Also applies to PMU < v3. The PMU is only disabled for EL3 and Secure
 	 * state execution. This does not affect lower NS ELs.
 	 */
 	pmuv3_init_el3();
+#endif
 #endif /*  IMAGE_BL32 */
 }
 

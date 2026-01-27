@@ -307,8 +307,8 @@ void fat32_list_entries(const int handle, uint32_t cluster, char *name) {
           VERBOSE("FAT32: find_entry: %s/%s\n", name, lname);
           continue;
         } // is Directory, go recursive
-        char path[FAT32_MAX_LONG_NAME_LENGTH];
-        snprintf(path, FAT32_MAX_LONG_NAME_LENGTH, "%s/%s", name, lname);
+        char path[FAT32_MAX_LONG_NAME_LENGTH + 1];
+        snprintf(path, FAT32_MAX_LONG_NAME_LENGTH + 1, "%s/%s", name, lname);
         fat32_list_entries(handle, fstclus(&entry_array[j]), path);
       }
     }

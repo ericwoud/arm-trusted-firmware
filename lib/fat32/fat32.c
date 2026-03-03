@@ -77,6 +77,7 @@ size_t strlcpy(char * dst, const char * src, size_t dsize)
 #endif
 
 struct BPB fat32_bs;
+bool info_max_size = true;
 
 #ifdef BUILD4ATF
 uint32_t *fat32_buffer = (uint32_t *)FAT32BUFFER;
@@ -266,8 +267,11 @@ int fat32_init(const int handle) {
 #else // BUILD4LINUX
     fat32_buffer_size = fat32_bs.BPB_FATSz32 * fat32_bs.BPB_BytesPerSec;
 #endif
-    VERBOSE("fat32_init: Maximum partition size supported %d MiB\n",
-          (fat32_buffer_size*(fat32_bs.BPB_TotSec32/fat32_bs.BPB_FATSz32))>>20);
+    if (info_max_size) {
+      INFO("fat32_init: Maximum partition size supported %d MiB\n",
+           (fat32_buffer_size*(fat32_bs.BPB_TotSec32/fat32_bs.BPB_FATSz32))>>20);
+      info_max_size = false;
+    }
   }
   if (fat32_bs.BS_Sig != 0xAA55) {
     ERROR("FAT32: readBS: Boot Sector Signature Mismatch 0x%x != 0xAA55)\n", fat32_bs.BS_Sig);
